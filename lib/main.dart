@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:wear_plus/wear_plus.dart';
 import 'package:workout/workout.dart';
 
+// 1. Import permission_handler
+import 'package:permission_handler/permission_handler.dart';
+
 void main() {
+  // Check the platform: if it's iOS, run MyIosApp; otherwise, run MyApp.
   runApp(Platform.isIOS ? const MyIosApp() : const MyApp());
 }
 
@@ -36,8 +40,10 @@ class _MyAppState extends State<MyApp> {
   bool started = false;
 
   _MyAppState() {
+    // Listen to the workout stream to receive sensor updates
     workout.stream.listen((event) {
       debugPrint('${event.feature}: ${event.value} (${event.timestamp})');
+
       switch (event.feature) {
         case WorkoutFeature.unknown:
           return;
@@ -65,12 +71,39 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  // 2. Define a method to request permissions
+  Future<bool> _requestPermissions() async {
+    // For body sensors (heart rate):
+    if (await Permission.sensors.request().isDenied) {
+      // If user denies, return false
+      return false;
+    }
+
+    // For activity recognition (steps, etc.)
+    if (await Permission.activityRecognition.request().isDenied) {
+      return false;
+    }
+
+    // For GPS tracking (distance, speed), you need location:
+    if (await Permission.locationWhenInUse.request().isDenied) {
+      return false;
+    }
+
+    // If you need background location, uncomment this and ensure
+    // you handle background location usage in your app.
+//    if (await Permission.locationAlways.request().isDenied) {
+//      return false;
+//    }
+
+    // If all requested permissions are granted, return true
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
-      // Use ambient mode to stay alive in the foreground
-      // Use a foreground service if you want to stay alive in the background
+      // Use AmbientMode on Wear OS to keep the screen active in a low-power state
       home: AmbientMode(
         builder: (context, mode, child) => child!,
         child: Scaffold(
@@ -98,27 +131,37 @@ class _MyAppState extends State<MyApp> {
 
   void toggleExerciseState() async {
     if (started) {
+      // If workout is started, stop it
       await workout.stop();
+      setState(() => started = false);
     } else {
+      // If not started, first check permissions
+      final granted = await _requestPermissions();
+      if (!granted) {
+        debugPrint('Permissions not granted. Cannot start workout.');
+        return;
+      }
+
+      // Get the list of supported exercise types (not strictly necessary, but useful)
       final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
       debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
 
+      // Start workout with your chosen exercise type and features
       final result = await workout.start(
-        // In a real application, check the supported exercise types first
         exerciseType: exerciseType,
         features: features,
         enableGps: enableGps,
       );
 
+      // If any requested features are unsupported, handle accordingly
       if (result.unsupportedFeatures.isNotEmpty) {
         debugPrint('Unsupported features: ${result.unsupportedFeatures}');
-        // In a real application, update the UI to match
       } else {
-        debugPrint('All requested features supported');
+        debugPrint('All requested features are supported');
       }
-    }
 
-    setState(() => started = !started);
+      setState(() => started = true);
+    }
   }
 }
 
