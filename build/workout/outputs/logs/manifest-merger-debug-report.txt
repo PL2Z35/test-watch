@@ -1,0 +1,23 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:1:1-5:12
+INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:1:1-5:12
+	package
+		ADDED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:1:70-98
+		INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:1:11-69
+queries
+ADDED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:2:5-4:15
+package#com.google.android.wearable.healthservices
+ADDED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:3:9-78
+	android:name
+		ADDED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml:3:18-75
+uses-sdk
+INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml
+INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/ubuntu/.pub-cache/hosted/pub.dev/workout-0.6.7/android/src/main/AndroidManifest.xml
