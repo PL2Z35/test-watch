@@ -13,10 +13,10 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Required for heart rate -->
-    <uses-permission android:name="android.permission.BODY_SENSORS" /> <!-- Required for calories, steps, distance, speed -->
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- Required to use location to estimate distance, speed -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- Permissions for GPS, if enabled -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Or -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature android:name="android.hardware.type.watch" />
 

@@ -15,20 +15,22 @@
 15    <uses-permission android:name="android.permission.INTERNET" />
 15-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml:6:5-66
 15-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml:6:22-64
-16    <!-- Required for heart rate -->
-17    <uses-permission android:name="android.permission.BODY_SENSORS" /> <!-- Required for calories, steps, distance, speed -->
-17-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:5-71
-17-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:22-68
-18    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- Required to use location to estimate distance, speed -->
-18-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:6:5-79
-18-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:6:22-76
-19    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-19-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:8:5-79
-19-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:8:22-76
+16    <uses-permission android:name="android.permission.BODY_SENSORS" />
+16-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:3:5-71
+16-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:3:22-68
+17    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- Permissions for GPS, if enabled -->
+17-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:5-79
+17-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:22-76
+18    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Or -->
+18-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:7:5-79
+18-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:7:22-76
+19    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+19-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:9:5-81
+19-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:9:22-78
 20
 21    <uses-feature android:name="android.hardware.type.watch" />
-21-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:10:5-64
-21-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:10:19-61
+21-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:11:5-64
+21-->/home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:11:19-61
 22
 23    <queries>
 23-->[:workout] /home/ubuntu/StudioProjects/watchsafeme/build/workout/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-9:15
