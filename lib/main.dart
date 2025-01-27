@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:wear_plus/wear_plus.dart';
 import 'package:workout/workout.dart';
-import 'package:permission_handler/permission_handler.dart'; // Importar el paquete de permisos
 
 void main() {
   runApp(Platform.isIOS ? const MyIosApp() : const MyApp());
@@ -46,41 +45,32 @@ class _MyAppState extends State<MyApp> {
           setState(() {
             heartRate = event.value;
           });
-          break;
         case WorkoutFeature.calories:
           setState(() {
             calories = event.value;
           });
-          break;
         case WorkoutFeature.steps:
           setState(() {
             steps = event.value;
           });
-          break;
         case WorkoutFeature.distance:
           setState(() {
             distance = event.value;
           });
-          break;
         case WorkoutFeature.speed:
           setState(() {
             speed = event.value;
           });
-          break;
       }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _requestPermissions(); // Solicitar permisos al iniciar
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
+      // Use ambient mode to stay alive in the foreground
+      // Use a foreground service if you want to stay alive in the background
       home: AmbientMode(
         builder: (context, mode, child) => child!,
         child: Scaffold(
@@ -106,71 +96,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  // Método para solicitar permisos
-  Future<void> _requestPermissions() async {
-    // Lista de permisos a solicitar
-    List<Permission> permissions = [
-      Permission.sensors,
-      Permission.activityRecognition,
-      if (enableGps) Permission.locationWhenInUse,
-    ];
-
-    // Solicitar permisos
-    Map<Permission, PermissionStatus> statuses = await permissions.request();
-
-    // Verificar si algún permiso fue denegado
-    if (statuses.values.any((status) => !status.isGranted)) {
-      // Mostrar diálogo si los permisos no fueron concedidos
-      _showPermissionDeniedDialog();
-    }
-  }
-
-  // Método para verificar si los permisos fueron concedidos
-  Future<bool> _arePermissionsGranted() async {
-    bool bodySensorsGranted = await Permission.sensors.isGranted;
-    bool activityRecognitionGranted = await Permission.activityRecognition.isGranted;
-    bool locationGranted = true;
-    if (enableGps) {
-      locationGranted = await Permission.locationWhenInUse.isGranted;
-    }
-    return bodySensorsGranted && activityRecognitionGranted && locationGranted;
-  }
-
-  // Método para mostrar un diálogo si los permisos son denegados
-  void _showPermissionDeniedDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Permisos Requeridos'),
-        content: const Text(
-            'Esta aplicación requiere ciertos permisos para funcionar correctamente. Por favor, otórgalos en la configuración.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-          TextButton(
-            onPressed: () {
-              openAppSettings();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Abrir Configuración'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void toggleExerciseState() async {
-    // Verificar permisos antes de iniciar
-    if (!await _arePermissionsGranted()) {
-      await _requestPermissions();
-      if (!await _arePermissionsGranted()) {
-        // Permisos aún no concedidos
-        return;
-      }
-    }
-
     if (started) {
       await workout.stop();
     } else {
@@ -178,7 +104,7 @@ class _MyAppState extends State<MyApp> {
       debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
 
       final result = await workout.start(
-        // En una aplicación real, verifica los tipos de ejercicio soportados primero
+        // In a real application, check the supported exercise types first
         exerciseType: exerciseType,
         features: features,
         enableGps: enableGps,
@@ -186,7 +112,7 @@ class _MyAppState extends State<MyApp> {
 
       if (result.unsupportedFeatures.isNotEmpty) {
         debugPrint('Unsupported features: ${result.unsupportedFeatures}');
-        // Manejar características no soportadas
+        // In a real application, update the UI to match
       } else {
         debugPrint('All requested features supported');
       }

@@ -40,6 +40,7 @@ MERGED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/Android
 INJECTED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml:1:1-7:12
 INJECTED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml:1:1-7:12
 INJECTED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+MERGED from [:device_info_plus] /home/ubuntu/StudioProjects/watchsafeme/build/device_info_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
 MERGED from [:workout] /home/ubuntu/StudioProjects/watchsafeme/build/workout/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-11:12
 MERGED from [:flutter_plugin_android_lifecycle] /home/ubuntu/StudioProjects/watchsafeme/build/flutter_plugin_android_lifecycle/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
 MERGED from [:permission_handler_android] /home/ubuntu/StudioProjects/watchsafeme/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
@@ -103,21 +104,25 @@ MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /home/ubuntu/.gradle/cache
 	xmlns:android
 		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:1:11-69
 uses-permission#android.permission.BODY_SENSORS
-ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:3:5-71
+ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:5-71
 	android:name
-		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:3:22-68
+		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:22-68
 uses-permission#android.permission.ACTIVITY_RECOGNITION
-ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:5-79
+ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:5:5-79
 	android:name
-		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:4:22-76
-uses-permission#android.permission.ACCESS_FINE_LOCATION
-ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:7:5-79
-	android:name
-		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:7:22-76
+		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:5:22-76
 uses-permission#android.permission.ACCESS_COARSE_LOCATION
-ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:9:5-81
+ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:7:5-81
 	android:name
-		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:9:22-78
+		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:7:22-78
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:8:5-79
+	android:name
+		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:8:22-76
+uses-permission#android.permission.ACCESS_BACKGROUND_LOCATION
+ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:9:5-85
+	android:name
+		ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:9:22-82
 uses-feature#android.hardware.type.watch
 ADDED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/main/AndroidManifest.xml:11:5-64
 MERGED from [:wear_plus] /home/ubuntu/StudioProjects/watchsafeme/build/wear_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:8:5-64
@@ -132,6 +137,8 @@ uses-sdk
 INJECTED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml
 INJECTED from /home/ubuntu/StudioProjects/watchsafeme/android/app/src/debug/AndroidManifest.xml
+MERGED from [:device_info_plus] /home/ubuntu/StudioProjects/watchsafeme/build/device_info_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:device_info_plus] /home/ubuntu/StudioProjects/watchsafeme/build/device_info_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:workout] /home/ubuntu/StudioProjects/watchsafeme/build/workout/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:workout] /home/ubuntu/StudioProjects/watchsafeme/build/workout/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:flutter_plugin_android_lifecycle] /home/ubuntu/StudioProjects/watchsafeme/build/flutter_plugin_android_lifecycle/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
