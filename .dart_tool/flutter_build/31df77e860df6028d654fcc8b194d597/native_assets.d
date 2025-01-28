@@ -1,0 +1,1 @@
+ /home/ubuntu/Documents/GitHub/test-watch/.dart_tool/flutter_build/31df77e860df6028d654fcc8b194d597/native_assets.yaml: 

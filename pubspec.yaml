@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   wear_plus: ^1.2.2
   workout: ^0.6.7
-  device_info_plus: ^11.2.1
+  heart_rate_flutter: ^0.0.3
 
 dev_dependencies:
   flutter_test:

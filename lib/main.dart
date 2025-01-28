@@ -3,12 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:wear_plus/wear_plus.dart';
 import 'package:workout/workout.dart';
-
-// 1. Import permission_handler
-import 'package:permission_handler/permission_handler.dart';
+import 'package:heart_rate_flutter/heart_rate_flutter.dart';
 
 void main() {
-  // Check the platform: if it's iOS, run MyIosApp; otherwise, run MyApp.
   runApp(Platform.isIOS ? const MyIosApp() : const MyApp());
 }
 
@@ -21,7 +18,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final workout = Workout();
+  final HeartRateFlutter _heartRateFlutterPlugin = HeartRateFlutter();
 
+  /// Variable que se mostrará en pantalla para la frecuencia cardíaca
+  var heartBeatValue = 0;
   final exerciseType = ExerciseType.walking;
   final features = [
     WorkoutFeature.heartRate,
@@ -40,70 +40,99 @@ class _MyAppState extends State<MyApp> {
   bool started = false;
 
   _MyAppState() {
-    // Listen to the workout stream to receive sensor updates
-    workout.stream.listen((event) {
-      debugPrint('${event.feature}: ${event.value} (${event.timestamp})');
-
-      switch (event.feature) {
-        case WorkoutFeature.unknown:
-          return;
-        case WorkoutFeature.heartRate:
+    /// Escuchamos el stream principal de `workout` con manejo de error
+    workout.stream.listen(
+          (event) {
+        try {
+          debugPrint('${event.feature}: ${event.value} (${event.timestamp})');
+          switch (event.feature) {
+            case WorkoutFeature.unknown:
+            // No hacemos nada especial
+              break;
+            case WorkoutFeature.heartRate:
+              setState(() {
+                // Si event.value fuera nulo, usamos 0 por defecto
+                heartRate = event.value ?? 0;
+              });
+              break;
+            case WorkoutFeature.calories:
+              setState(() {
+                calories = event.value ?? 0;
+              });
+              break;
+            case WorkoutFeature.steps:
+              setState(() {
+                steps = event.value ?? 0;
+              });
+              break;
+            case WorkoutFeature.distance:
+              setState(() {
+                distance = event.value ?? 0;
+              });
+              break;
+            case WorkoutFeature.speed:
+              setState(() {
+                speed = event.value ?? 0;
+              });
+              break;
+          }
+        } catch (e) {
+          // Ante cualquier excepción, ponemos valores en cero
+          debugPrint('Error en el stream de workout: $e');
           setState(() {
-            heartRate = event.value;
+            heartRate = 0;
+            calories = 0;
+            steps = 0;
+            distance = 0;
+            speed = 0;
           });
-        case WorkoutFeature.calories:
-          setState(() {
-            calories = event.value;
-          });
-        case WorkoutFeature.steps:
-          setState(() {
-            steps = event.value;
-          });
-        case WorkoutFeature.distance:
-          setState(() {
-            distance = event.value;
-          });
-        case WorkoutFeature.speed:
-          setState(() {
-            speed = event.value;
-          });
-      }
-    });
+        }
+      },
+      onError: (error) {
+        debugPrint('Error en stream.listen: $error');
+        setState(() {
+          heartRate = 0;
+          calories = 0;
+          steps = 0;
+          distance = 0;
+          speed = 0;
+        });
+      },
+    );
   }
 
-  // 2. Define a method to request permissions
-  Future<bool> _requestPermissions() async {
-    // For body sensors (heart rate):
-    if (await Permission.sensors.request().isDenied) {
-      // If user denies, return false
-      return false;
-    }
+  @override
+  void initState() {
+    super.initState();
 
-    // For activity recognition (steps, etc.)
-    if (await Permission.activityRecognition.request().isDenied) {
-      return false;
-    }
+    /// Inicializa el plugin para la lectura de ritmo cardíaco
+    _heartRateFlutterPlugin.init();
 
-    // For GPS tracking (distance, speed), you need location:
-    if (await Permission.locationWhenInUse.request().isDenied) {
-      return false;
-    }
-
-    // If you need background location, uncomment this and ensure
-    // you handle background location usage in your app.
-//    if (await Permission.locationAlways.request().isDenied) {
-//      return false;
-//    }
-
-    // If all requested permissions are granted, return true
-    return true;
+    /// Suscripción al stream de lectura de ritmo cardíaco con manejo de error
+    _heartRateFlutterPlugin.heartBeatStream.listen(
+          (double? event) {
+        if (mounted) {
+          setState(() {
+            /// Convertimos el valor double a int y si es nulo usamos 0
+            heartBeatValue = (event ?? 0).toInt();
+          });
+        }
+      },
+      onError: (error) {
+        debugPrint('Error en heartBeatStream: $error');
+        if (mounted) {
+          setState(() {
+            heartBeatValue = 0;
+          });
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
-      // Use AmbientMode on Wear OS to keep the screen active in a low-power state
       home: AmbientMode(
         builder: (context, mode, child) => child!,
         child: Scaffold(
@@ -111,7 +140,9 @@ class _MyAppState extends State<MyApp> {
             child: Column(
               children: [
                 const Spacer(),
-                Text('Heart rate: $heartRate'),
+                /// Aquí se refleja el valor de `heartBeatValue` proveniente del plugin
+                Text('Heart rate value: $heartBeatValue'),
+                Text('Heart rate (Workout API): $heartRate'),
                 Text('Calories: ${calories.toStringAsFixed(2)}'),
                 Text('Steps: $steps'),
                 Text('Distance: ${distance.toStringAsFixed(2)}'),
@@ -131,37 +162,41 @@ class _MyAppState extends State<MyApp> {
 
   void toggleExerciseState() async {
     if (started) {
-      // If workout is started, stop it
       await workout.stop();
-      setState(() => started = false);
     } else {
-      // If not started, first check permissions
-      final granted = await _requestPermissions();
-      if (!granted) {
-        debugPrint('Permissions not granted. Cannot start workout.');
+      try {
+        final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
+        debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
+
+        final result = await workout.start(
+          // En una app real, revisa primero los tipos de ejercicio compatibles
+          exerciseType: exerciseType,
+          features: features,
+          enableGps: enableGps,
+        );
+
+        if (result.unsupportedFeatures.isNotEmpty) {
+          debugPrint('Unsupported features: ${result.unsupportedFeatures}');
+          // Maneja en la UI si lo deseas
+        } else {
+          debugPrint('All requested features supported');
+        }
+      } catch (e) {
+        debugPrint('Error al iniciar el workout: $e');
+        // Ponemos valores por defecto en caso de error
+        setState(() {
+          heartRate = 0;
+          calories = 0;
+          steps = 0;
+          distance = 0;
+          speed = 0;
+          started = false;
+        });
         return;
       }
-
-      // Get the list of supported exercise types (not strictly necessary, but useful)
-      final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
-      debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
-
-      // Start workout with your chosen exercise type and features
-      final result = await workout.start(
-        exerciseType: exerciseType,
-        features: features,
-        enableGps: enableGps,
-      );
-
-      // If any requested features are unsupported, handle accordingly
-      if (result.unsupportedFeatures.isNotEmpty) {
-        debugPrint('Unsupported features: ${result.unsupportedFeatures}');
-      } else {
-        debugPrint('All requested features are supported');
-      }
-
-      setState(() => started = true);
     }
+
+    setState(() => started = !started);
   }
 }
 
@@ -213,8 +248,15 @@ class _MyIosAppState extends State<MyIosApp> {
               TextField(
                 decoration: const InputDecoration(labelText: 'Lap length'),
                 keyboardType: TextInputType.number,
-                onChanged: (value) =>
-                    setState(() => lapLength = double.parse(value)),
+                onChanged: (value) {
+                  try {
+                    setState(() => lapLength = double.parse(value));
+                  } catch (e) {
+                    // Si ocurre algún error, dejamos lapLength en 25.0 por defecto
+                    debugPrint('Error parseando lapLength: $e');
+                    setState(() => lapLength = 25.0);
+                  }
+                },
               ),
               ElevatedButton(
                 onPressed: start,
@@ -228,12 +270,17 @@ class _MyIosAppState extends State<MyIosApp> {
   }
 
   void start() {
-    workout.start(
-      exerciseType: exerciseType,
-      features: [],
-      locationType: locationType,
-      swimmingLocationType: swimmingLocationType,
-      lapLength: lapLength,
-    );
+    try {
+      workout.start(
+        exerciseType: exerciseType,
+        features: [],
+        locationType: locationType,
+        swimmingLocationType: swimmingLocationType,
+        lapLength: lapLength,
+      );
+    } catch (e) {
+      debugPrint('Error al iniciar el workout en iOS: $e');
+      // Manejar en UI o restablecer estado si fuera necesario
+    }
   }
 }

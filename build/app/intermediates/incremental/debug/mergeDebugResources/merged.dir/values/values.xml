@@ -316,11 +316,11 @@
     <dimen name="complicationDrawable_titleSize">14sp</dimen>
     <dimen name="config_margin">12dp</dimen>
     <dimen name="confirmation_overlay_image_bottom_margin">8dp</dimen>
-    <dimen name="confirmation_overlay_image_size">64dp</dimen>
+    <dimen name="confirmation_overlay_image_size">48dp</dimen>
     <dimen name="confirmation_overlay_text_bottom_margin">16dp</dimen>
     <item format="float" name="confirmation_overlay_text_letter_spacing" type="dimen">0.01</item>
     <dimen name="confirmation_overlay_text_line_height">20sp</dimen>
-    <dimen name="confirmation_overlay_text_size">14sp</dimen>
+    <dimen name="confirmation_overlay_text_size">16sp</dimen>
     <dimen name="diag_button_bottom_padding">10dp</dimen>
     <dimen name="diag_button_bottom_padding_round">32dp</dimen>
     <dimen name="diag_button_side_padding_right_round">22dp</dimen>
@@ -1737,10 +1737,10 @@
         <item name="android:scaleType">center</item>
     </style>
     <style name="ConfirmationActivity" parent="android:Theme.Translucent.NoTitleBar.Fullscreen">
-<item name="android:windowEnterAnimation">@null</item>
-<item name="android:activityOpenEnterAnimation">@null</item>
-<item name="android:windowAnimationStyle">@null</item>
-</style>
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         
         <item name="android:windowBackground">@drawable/launch_background</item>
@@ -3153,7 +3153,13 @@
         
         <attr name="selectableItemBackground"/>
     </declare-styleable>
-    <declare-styleable name="BoxInsetLayout_Layout"><attr name="boxedEdges">
+    <declare-styleable name="BoxInsetLayout_Layout"><attr name="layout_box">
+<flag name="left" value="0x01"/>
+<flag name="top" value="0x02"/>
+<flag name="right" value="0x04"/>
+<flag name="bottom" value="0x08"/>
+<flag name="all" value="0x0F"/>
+</attr><attr name="boxedEdges">
             
             <flag name="none" value="0x00"/>
             
@@ -3179,13 +3185,7 @@
             <flag name="bottom" value="0x08"/>
             
             <flag name="all" value="0x0F"/>
-        </attr><attr name="layout_box">
-<flag name="left" value="0x01"/>
-<flag name="top" value="0x02"/>
-<flag name="right" value="0x04"/>
-<flag name="bottom" value="0x08"/>
-<flag name="all" value="0x0F"/>
-</attr></declare-styleable>
+        </attr></declare-styleable>
     <declare-styleable name="ButtonBarLayout">
         
         <attr format="boolean" name="allowStacking"/>
@@ -3207,15 +3207,7 @@
         <attr format="boolean" name="disableDependentsState"/>
         <attr name="android:disableDependentsState"/>
     </declare-styleable>
-    <declare-styleable name="CircledImageView"><attr name="android:src"/><attr format="color" name="background_color"/><attr format="dimension" name="background_radius"/><attr format="dimension" name="background_radius_pressed"/><attr format="dimension" name="background_border_width"/><attr format="color" name="background_border_color"/><attr format="enum" name="background_border_cap">
-            <enum name="butt" value="0"/>
-            <enum name="round" value="1"/>
-            <enum name="square" value="2"/>
-        </attr><attr format="dimension" name="img_padding"/><attr format="dimension" name="background_shadow_width"/><attr format="dimension" name="img_circle_percentage"/><attr format="dimension" name="img_horizontal_offset_percentage"/><attr format="color" name="img_tint"/><attr format="fraction" name="background_radius_percent"/><attr format="fraction" name="background_radius_pressed_percent"/><attr format="enum" name="clip_dimen">
-            <enum name="none" value="0"/>
-            <enum name="height" value="1"/>
-            <enum name="width" value="2"/>
-        </attr><attr format="color" name="circle_color"/><attr format="dimension" name="circle_radius"/><attr format="dimension" name="circle_radius_pressed"/><attr format="dimension" name="circle_border_width"/><attr format="color" name="circle_border_color"/><attr name="circle_border_cap">
+    <declare-styleable name="CircledImageView"><attr name="android:src"/><attr format="color" name="circle_color"/><attr format="dimension" name="circle_radius"/><attr format="dimension" name="circle_radius_pressed"/><attr format="dimension" name="circle_border_width"/><attr format="color" name="circle_border_color"/><attr name="circle_border_cap">
 <enum name="butt" value="0"/>
 
 <enum name="round" value="1"/>
@@ -3229,7 +3221,15 @@
 
 <enum name="width" value="2"/>
 
-</attr></declare-styleable>
+</attr><attr format="color" name="background_color"/><attr format="dimension" name="background_radius"/><attr format="dimension" name="background_radius_pressed"/><attr format="dimension" name="background_border_width"/><attr format="color" name="background_border_color"/><attr format="enum" name="background_border_cap">
+            <enum name="butt" value="0"/>
+            <enum name="round" value="1"/>
+            <enum name="square" value="2"/>
+        </attr><attr format="dimension" name="img_padding"/><attr format="dimension" name="background_shadow_width"/><attr format="dimension" name="img_circle_percentage"/><attr format="dimension" name="img_horizontal_offset_percentage"/><attr format="color" name="img_tint"/><attr format="fraction" name="background_radius_percent"/><attr format="fraction" name="background_radius_pressed_percent"/><attr format="enum" name="clip_dimen">
+            <enum name="none" value="0"/>
+            <enum name="height" value="1"/>
+            <enum name="width" value="2"/>
+        </attr></declare-styleable>
     <declare-styleable name="CircularButton">
 <attr name="android:src"/>
 <attr name="imageScaleMode">
@@ -3773,7 +3773,7 @@
         <attr name="entryValues"/>
         <attr name="android:entryValues"/>
     </declare-styleable>
-    <declare-styleable name="PageIndicatorView"><attr format="dimension" name="wsPageIndicatorDotSpacing"/><attr format="dimension" name="wsPageIndicatorDotRadius"/><attr format="dimension" name="wsPageIndicatorDotRadiusSelected"/><attr format="color" name="wsPageIndicatorDotColor"/><attr format="color" name="wsPageIndicatorDotColorSelected"/><attr format="boolean" name="wsPageIndicatorDotFadeWhenIdle"/><attr format="integer" name="wsPageIndicatorDotFadeOutDelay"/><attr format="integer" name="wsPageIndicatorDotFadeOutDuration"/><attr format="integer" name="wsPageIndicatorDotFadeInDuration"/><attr format="color" name="wsPageIndicatorDotShadowColor"/><attr format="dimension" name="wsPageIndicatorDotShadowRadius"/><attr format="dimension" name="wsPageIndicatorDotShadowDx"/><attr format="dimension" name="wsPageIndicatorDotShadowDy"/><attr format="dimension" name="pageIndicatorDotSpacing"/><attr format="dimension" name="pageIndicatorDotRadius"/><attr format="dimension" name="pageIndicatorDotRadiusSelected"/><attr format="color" name="pageIndicatorDotColor"/><attr format="color" name="pageIndicatorDotColorSelected"/><attr format="boolean" name="pageIndicatorDotFadeWhenIdle"/><attr format="integer" name="pageIndicatorDotFadeOutDelay"/><attr format="integer" name="pageIndicatorDotFadeOutDuration"/><attr format="integer" name="pageIndicatorDotFadeInDuration"/><attr format="color" name="pageIndicatorDotShadowColor"/><attr format="dimension" name="pageIndicatorDotShadowRadius"/><attr format="dimension" name="pageIndicatorDotShadowDx"/><attr format="dimension" name="pageIndicatorDotShadowDy"/></declare-styleable>
+    <declare-styleable name="PageIndicatorView"><attr format="dimension" name="pageIndicatorDotSpacing"/><attr format="dimension" name="pageIndicatorDotRadius"/><attr format="dimension" name="pageIndicatorDotRadiusSelected"/><attr format="color" name="pageIndicatorDotColor"/><attr format="color" name="pageIndicatorDotColorSelected"/><attr format="boolean" name="pageIndicatorDotFadeWhenIdle"/><attr format="integer" name="pageIndicatorDotFadeOutDelay"/><attr format="integer" name="pageIndicatorDotFadeOutDuration"/><attr format="integer" name="pageIndicatorDotFadeInDuration"/><attr format="color" name="pageIndicatorDotShadowColor"/><attr format="dimension" name="pageIndicatorDotShadowRadius"/><attr format="dimension" name="pageIndicatorDotShadowDx"/><attr format="dimension" name="pageIndicatorDotShadowDy"/><attr format="dimension" name="wsPageIndicatorDotSpacing"/><attr format="dimension" name="wsPageIndicatorDotRadius"/><attr format="dimension" name="wsPageIndicatorDotRadiusSelected"/><attr format="color" name="wsPageIndicatorDotColor"/><attr format="color" name="wsPageIndicatorDotColorSelected"/><attr format="boolean" name="wsPageIndicatorDotFadeWhenIdle"/><attr format="integer" name="wsPageIndicatorDotFadeOutDelay"/><attr format="integer" name="wsPageIndicatorDotFadeOutDuration"/><attr format="integer" name="wsPageIndicatorDotFadeInDuration"/><attr format="color" name="wsPageIndicatorDotShadowColor"/><attr format="dimension" name="wsPageIndicatorDotShadowRadius"/><attr format="dimension" name="wsPageIndicatorDotShadowDx"/><attr format="dimension" name="wsPageIndicatorDotShadowDy"/></declare-styleable>
     <declare-styleable name="PercentLayout_Layout">
         <attr format="fraction" name="layout_widthPercent"/>
 
@@ -4348,7 +4348,7 @@
 
 <attr format="reference" name="negativeButtonIcon"/>
 </declare-styleable>
-    <declare-styleable name="WearableDrawerView"><attr format="reference" name="peekView"/><attr format="reference" name="drawerContent"/><attr format="boolean" name="enableAutoPeek"/><attr name="android:background"/><attr name="android:elevation"/><attr format="reference" name="peek_view"/><attr format="reference" name="drawer_content"/></declare-styleable>
+    <declare-styleable name="WearableDrawerView"><attr format="reference" name="peek_view"/><attr format="reference" name="drawer_content"/><attr format="reference" name="peekView"/><attr format="reference" name="drawerContent"/><attr format="boolean" name="enableAutoPeek"/><attr name="android:background"/><attr name="android:elevation"/></declare-styleable>
     <declare-styleable name="WearableFrameLayout"><attr name="layout_gravityRound">
 <flag name="top" value="0x30"/>
 <flag name="bottom" value="0x50"/>
@@ -4407,5 +4407,5 @@
             <enum name="multiPage" value="1"/>
         </attr>
     </declare-styleable>
-    <declare-styleable name="WearableRecyclerView"><attr format="fraction" name="bezelWidth"/><attr format="boolean" name="circularScrollingGestureEnabled"/><attr format="float" name="scrollDegreesPerScreen"/><attr format="fraction" name="bezel_width"/><attr format="boolean" name="circular_scrolling_gesture_enabled"/><attr format="float" name="scroll_degrees_per_screen"/></declare-styleable>
+    <declare-styleable name="WearableRecyclerView"><attr format="fraction" name="bezel_width"/><attr format="boolean" name="circular_scrolling_gesture_enabled"/><attr format="float" name="scroll_degrees_per_screen"/><attr format="fraction" name="bezelWidth"/><attr format="boolean" name="circularScrollingGestureEnabled"/><attr format="float" name="scrollDegreesPerScreen"/></declare-styleable>
 </resources>
