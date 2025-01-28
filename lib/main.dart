@@ -1,15 +1,18 @@
 import 'dart:io';
-import 'dart:async'; // Importante para las suscripciones de los Streams
+import 'dart:async'; // Important for stream subscriptions
 import 'package:flutter/material.dart';
 import 'package:wear_plus/wear_plus.dart';
 import 'package:workout/workout.dart';
 import 'package:heart_rate_flutter/heart_rate_flutter.dart';
-import 'package:sensors_plus/sensors_plus.dart'; // <-- Import de sensors_plus
+import 'package:sensors_plus/sensors_plus.dart'; // <-- Importing sensors_plus package
 
+/// The main entry point of the application.
+/// It determines the platform and runs the appropriate app (iOS or others).
 void main() {
   runApp(Platform.isIOS ? const MyIosApp() : const MyApp());
 }
 
+/// The main application widget for non-iOS platforms.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -17,13 +20,15 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+/// The state class for [MyApp].
 class _MyAppState extends State<MyApp> {
   final workout = Workout();
   final HeartRateFlutter _heartRateFlutterPlugin = HeartRateFlutter();
 
-  /// Variable que se mostrará en pantalla para la frecuencia cardíaca (plugin heart_rate_flutter)
+  /// Variable to display heart rate (from heart_rate_flutter plugin)
   var heartBeatValue = 0;
 
+  // Configuration for the workout
   final exerciseType = ExerciseType.walking;
   final features = [
     WorkoutFeature.heartRate,
@@ -34,6 +39,7 @@ class _MyAppState extends State<MyApp> {
   ];
   final enableGps = true;
 
+  // Variables to store workout data
   double heartRate = 0;
   double calories = 0;
   double steps = 0;
@@ -41,29 +47,31 @@ class _MyAppState extends State<MyApp> {
   double speed = 0;
   bool started = false;
 
-  // Variables para almacenar la lectura de los sensores
+  // Variables to store sensor readings
   double accX = 0, accY = 0, accZ = 0;
   double gyrX = 0, gyrY = 0, gyrZ = 0;
   double magX = 0, magY = 0, magZ = 0;
 
-  // Suscripciones a los streams
+  // Subscriptions to sensor streams
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
   StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;
 
+  /// Constructor for [_MyAppState].
+  /// Sets up the workout stream listener with error handling.
   _MyAppState() {
-    /// Escuchamos el stream principal de `workout` con manejo de error
+    /// Listen to the main workout stream with error handling
     workout.stream.listen(
           (event) {
         try {
           debugPrint('${event.feature}: ${event.value} (${event.timestamp})');
           switch (event.feature) {
             case WorkoutFeature.unknown:
-            // No hacemos nada especial
+            // Do nothing special for unknown features
               break;
             case WorkoutFeature.heartRate:
               setState(() {
-                // Si event.value fuera nulo, usamos 0 por defecto
+                // If event.value is null, use 0 as default
                 heartRate = event.value ?? 0;
               });
               break;
@@ -89,8 +97,8 @@ class _MyAppState extends State<MyApp> {
               break;
           }
         } catch (e) {
-          // Ante cualquier excepción, ponemos valores en cero
-          debugPrint('Error en el stream de workout: $e');
+          // On any exception, reset values to zero
+          debugPrint('Error in workout stream: $e');
           setState(() {
             heartRate = 0;
             calories = 0;
@@ -101,7 +109,7 @@ class _MyAppState extends State<MyApp> {
         }
       },
       onError: (error) {
-        debugPrint('Error en stream.listen: $error');
+        debugPrint('Error in stream.listen: $error');
         setState(() {
           heartRate = 0;
           calories = 0;
@@ -117,21 +125,21 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    /// Inicializa el plugin para la lectura de ritmo cardíaco
+    /// Initialize the heart rate plugin
     _heartRateFlutterPlugin.init();
 
-    /// Suscripción al stream de lectura de ritmo cardíaco con manejo de error
+    /// Subscribe to the heart rate stream with error handling
     _heartRateFlutterPlugin.heartBeatStream.listen(
           (double? event) {
         if (mounted) {
           setState(() {
-            /// Convertimos el valor double a int y si es nulo usamos 0
+            /// Convert the double value to int, default to 0 if null
             heartBeatValue = (event ?? 0).toInt();
           });
         }
       },
       onError: (error) {
-        debugPrint('Error en heartBeatStream: $error');
+        debugPrint('Error in heartBeatStream: $error');
         if (mounted) {
           setState(() {
             heartBeatValue = 0;
@@ -140,7 +148,7 @@ class _MyAppState extends State<MyApp> {
       },
     );
 
-    /// Suscribirnos a los sensores (con manejo de excepciones)
+    /// Subscribe to the accelerometer sensor with exception handling
     try {
       _accelerometerSubscription =
           accelerometerEvents.listen((AccelerometerEvent event) {
@@ -151,9 +159,10 @@ class _MyAppState extends State<MyApp> {
             });
           });
     } catch (e) {
-      debugPrint('Error suscribiendo al acelerómetro: $e');
+      debugPrint('Error subscribing to accelerometer: $e');
     }
 
+    /// Subscribe to the gyroscope sensor with exception handling
     try {
       _gyroscopeSubscription = gyroscopeEvents.listen((GyroscopeEvent event) {
         setState(() {
@@ -163,9 +172,10 @@ class _MyAppState extends State<MyApp> {
         });
       });
     } catch (e) {
-      debugPrint('Error suscribiendo al giroscopio: $e');
+      debugPrint('Error subscribing to gyroscope: $e');
     }
 
+    /// Subscribe to the magnetometer sensor with exception handling
     try {
       _magnetometerSubscription =
           magnetometerEvents.listen((MagnetometerEvent event) {
@@ -176,13 +186,13 @@ class _MyAppState extends State<MyApp> {
             });
           });
     } catch (e) {
-      debugPrint('Error suscribiendo al magnetómetro: $e');
+      debugPrint('Error subscribing to magnetometer: $e');
     }
   }
 
   @override
   void dispose() {
-    // Cancelamos las suscripciones para evitar fugas de memoria
+    // Cancel subscriptions to prevent memory leaks
     _accelerometerSubscription?.cancel();
     _gyroscopeSubscription?.cancel();
     _magnetometerSubscription?.cancel();
@@ -201,29 +211,29 @@ class _MyAppState extends State<MyApp> {
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  // Frecuencia cardíaca desde heart_rate_flutter
+                  // Heart rate from heart_rate_flutter plugin
                   Text('Heart rate value (plugin): $heartBeatValue'),
-                  // Frecuencia cardíaca desde Workout
+                  // Heart rate from Workout API
                   Text('Heart rate (Workout API): $heartRate'),
                   Text('Calories: ${calories.toStringAsFixed(2)}'),
                   Text('Steps: $steps'),
                   Text('Distance: ${distance.toStringAsFixed(2)}'),
                   Text('Speed: ${speed.toStringAsFixed(2)}'),
                   const Divider(),
-                  // Lectura de Acelerómetro
-                  Text('Acelerómetro:'),
+                  // Accelerometer readings
+                  Text('Accelerometer:'),
                   Text('   X: ${accX.toStringAsFixed(2)}'),
                   Text('   Y: ${accY.toStringAsFixed(2)}'),
                   Text('   Z: ${accZ.toStringAsFixed(2)}'),
                   const Divider(),
-                  // Lectura de Giroscopio
-                  Text('Giroscopio:'),
+                  // Gyroscope readings
+                  Text('Gyroscope:'),
                   Text('   X: ${gyrX.toStringAsFixed(2)}'),
                   Text('   Y: ${gyrY.toStringAsFixed(2)}'),
                   Text('   Z: ${gyrZ.toStringAsFixed(2)}'),
                   const Divider(),
-                  // Lectura de Magnetómetro
-                  Text('Magnetómetro:'),
+                  // Magnetometer readings
+                  Text('Magnetometer:'),
                   Text('   X: ${magX.toStringAsFixed(2)}'),
                   Text('   Y: ${magY.toStringAsFixed(2)}'),
                   Text('   Z: ${magZ.toStringAsFixed(2)}'),
@@ -241,28 +251,35 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  /// Toggles the exercise state between started and stopped.
+  /// Starts or stops the workout accordingly.
   void toggleExerciseState() async {
     if (started) {
+      // If workout is started, stop it
       await workout.stop();
     } else {
+      // If workout is not started, attempt to start it
       try {
+        // Retrieve supported exercise types
         final supportedExerciseTypes = await workout.getSupportedExerciseTypes();
         debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
 
+        // Start the workout with specified configuration
         final result = await workout.start(
           exerciseType: exerciseType,
           features: features,
           enableGps: enableGps,
         );
 
+        // Check for unsupported features
         if (result.unsupportedFeatures.isNotEmpty) {
           debugPrint('Unsupported features: ${result.unsupportedFeatures}');
         } else {
           debugPrint('All requested features supported');
         }
       } catch (e) {
-        debugPrint('Error al iniciar el workout: $e');
-        // Ponemos valores por defecto en caso de error
+        debugPrint('Error starting workout: $e');
+        // Reset values in case of error
         setState(() {
           heartRate = 0;
           calories = 0;
@@ -275,10 +292,12 @@ class _MyAppState extends State<MyApp> {
       }
     }
 
+    // Toggle the started state
     setState(() => started = !started);
   }
 }
 
+/// The main application widget for iOS platforms.
 class MyIosApp extends StatefulWidget {
   const MyIosApp({super.key});
 
@@ -286,9 +305,11 @@ class MyIosApp extends StatefulWidget {
   State<StatefulWidget> createState() => _MyIosAppState();
 }
 
+/// The state class for [MyIosApp].
 class _MyIosAppState extends State<MyIosApp> {
   final workout = Workout();
 
+  // Configuration variables for the workout
   var exerciseType = ExerciseType.workout;
   var locationType = WorkoutLocationType.indoor;
   var swimmingLocationType = WorkoutSwimmingLocationType.pool;
@@ -302,6 +323,7 @@ class _MyIosAppState extends State<MyIosApp> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Dropdown to select exercise type
               DropdownButton<ExerciseType>(
                 value: exerciseType,
                 onChanged: (value) => setState(() => exerciseType = value!),
@@ -309,6 +331,7 @@ class _MyIosAppState extends State<MyIosApp> {
                     .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                     .toList(),
               ),
+              // Dropdown to select workout location type
               DropdownButton<WorkoutLocationType>(
                 value: locationType,
                 onChanged: (value) => setState(() => locationType = value!),
@@ -316,6 +339,7 @@ class _MyIosAppState extends State<MyIosApp> {
                     .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                     .toList(),
               ),
+              // Dropdown to select swimming location type
               DropdownButton<WorkoutSwimmingLocationType>(
                 value: swimmingLocationType,
                 onChanged: (value) =>
@@ -324,6 +348,7 @@ class _MyIosAppState extends State<MyIosApp> {
                     .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                     .toList(),
               ),
+              // TextField to input lap length
               TextField(
                 decoration: const InputDecoration(labelText: 'Lap length'),
                 keyboardType: TextInputType.number,
@@ -331,12 +356,13 @@ class _MyIosAppState extends State<MyIosApp> {
                   try {
                     setState(() => lapLength = double.parse(value));
                   } catch (e) {
-                    // Si ocurre algún error, dejamos lapLength en 25.0 por defecto
-                    debugPrint('Error parseando lapLength: $e');
+                    // If parsing fails, default to 25.0
+                    debugPrint('Error parsing lapLength: $e');
                     setState(() => lapLength = 25.0);
                   }
                 },
               ),
+              // Button to start the Apple Watch app
               ElevatedButton(
                 onPressed: start,
                 child: const Text('Start Apple Watch app'),
@@ -348,6 +374,7 @@ class _MyIosAppState extends State<MyIosApp> {
     );
   }
 
+  /// Starts the workout with the selected configuration.
   void start() {
     try {
       workout.start(
@@ -358,8 +385,8 @@ class _MyIosAppState extends State<MyIosApp> {
         lapLength: lapLength,
       );
     } catch (e) {
-      debugPrint('Error al iniciar el workout en iOS: $e');
-      // Manejar en UI o restablecer estado si fuera necesario
+      debugPrint('Error starting workout on iOS: $e');
+      // Handle the error in UI or reset state if necessary
     }
   }
 }
