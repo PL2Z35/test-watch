@@ -37,6 +37,7 @@ dependencies:
   wear_plus: ^1.2.2
   workout: ^0.6.7
   heart_rate_flutter: ^0.0.3
+  sensors_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,10 @@
 import 'dart:io';
-
+import 'dart:async'; // Importante para las suscripciones de los Streams
 import 'package:flutter/material.dart';
 import 'package:wear_plus/wear_plus.dart';
 import 'package:workout/workout.dart';
 import 'package:heart_rate_flutter/heart_rate_flutter.dart';
+import 'package:sensors_plus/sensors_plus.dart'; // <-- Import de sensors_plus
 
 void main() {
   runApp(Platform.isIOS ? const MyIosApp() : const MyApp());
@@ -20,8 +21,9 @@ class _MyAppState extends State<MyApp> {
   final workout = Workout();
   final HeartRateFlutter _heartRateFlutterPlugin = HeartRateFlutter();
 
-  /// Variable que se mostrará en pantalla para la frecuencia cardíaca
+  /// Variable que se mostrará en pantalla para la frecuencia cardíaca (plugin heart_rate_flutter)
   var heartBeatValue = 0;
+
   final exerciseType = ExerciseType.walking;
   final features = [
     WorkoutFeature.heartRate,
@@ -38,6 +40,16 @@ class _MyAppState extends State<MyApp> {
   double distance = 0;
   double speed = 0;
   bool started = false;
+
+  // Variables para almacenar la lectura de los sensores
+  double accX = 0, accY = 0, accZ = 0;
+  double gyrX = 0, gyrY = 0, gyrZ = 0;
+  double magX = 0, magY = 0, magZ = 0;
+
+  // Suscripciones a los streams
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
+  StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
+  StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;
 
   _MyAppState() {
     /// Escuchamos el stream principal de `workout` con manejo de error
@@ -127,6 +139,54 @@ class _MyAppState extends State<MyApp> {
         }
       },
     );
+
+    /// Suscribirnos a los sensores (con manejo de excepciones)
+    try {
+      _accelerometerSubscription =
+          accelerometerEvents.listen((AccelerometerEvent event) {
+            setState(() {
+              accX = event.x;
+              accY = event.y;
+              accZ = event.z;
+            });
+          });
+    } catch (e) {
+      debugPrint('Error suscribiendo al acelerómetro: $e');
+    }
+
+    try {
+      _gyroscopeSubscription = gyroscopeEvents.listen((GyroscopeEvent event) {
+        setState(() {
+          gyrX = event.x;
+          gyrY = event.y;
+          gyrZ = event.z;
+        });
+      });
+    } catch (e) {
+      debugPrint('Error suscribiendo al giroscopio: $e');
+    }
+
+    try {
+      _magnetometerSubscription =
+          magnetometerEvents.listen((MagnetometerEvent event) {
+            setState(() {
+              magX = event.x;
+              magY = event.y;
+              magZ = event.z;
+            });
+          });
+    } catch (e) {
+      debugPrint('Error suscribiendo al magnetómetro: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    // Cancelamos las suscripciones para evitar fugas de memoria
+    _accelerometerSubscription?.cancel();
+    _gyroscopeSubscription?.cancel();
+    _magnetometerSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -137,22 +197,43 @@ class _MyAppState extends State<MyApp> {
         builder: (context, mode, child) => child!,
         child: Scaffold(
           body: Center(
-            child: Column(
-              children: [
-                const Spacer(),
-                /// Aquí se refleja el valor de `heartBeatValue` proveniente del plugin
-                Text('Heart rate value: $heartBeatValue'),
-                Text('Heart rate (Workout API): $heartRate'),
-                Text('Calories: ${calories.toStringAsFixed(2)}'),
-                Text('Steps: $steps'),
-                Text('Distance: ${distance.toStringAsFixed(2)}'),
-                Text('Speed: ${speed.toStringAsFixed(2)}'),
-                const Spacer(),
-                TextButton(
-                  onPressed: toggleExerciseState,
-                  child: Text(started ? 'Stop' : 'Start'),
-                ),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+                  // Frecuencia cardíaca desde heart_rate_flutter
+                  Text('Heart rate value (plugin): $heartBeatValue'),
+                  // Frecuencia cardíaca desde Workout
+                  Text('Heart rate (Workout API): $heartRate'),
+                  Text('Calories: ${calories.toStringAsFixed(2)}'),
+                  Text('Steps: $steps'),
+                  Text('Distance: ${distance.toStringAsFixed(2)}'),
+                  Text('Speed: ${speed.toStringAsFixed(2)}'),
+                  const Divider(),
+                  // Lectura de Acelerómetro
+                  Text('Acelerómetro:'),
+                  Text('   X: ${accX.toStringAsFixed(2)}'),
+                  Text('   Y: ${accY.toStringAsFixed(2)}'),
+                  Text('   Z: ${accZ.toStringAsFixed(2)}'),
+                  const Divider(),
+                  // Lectura de Giroscopio
+                  Text('Giroscopio:'),
+                  Text('   X: ${gyrX.toStringAsFixed(2)}'),
+                  Text('   Y: ${gyrY.toStringAsFixed(2)}'),
+                  Text('   Z: ${gyrZ.toStringAsFixed(2)}'),
+                  const Divider(),
+                  // Lectura de Magnetómetro
+                  Text('Magnetómetro:'),
+                  Text('   X: ${magX.toStringAsFixed(2)}'),
+                  Text('   Y: ${magY.toStringAsFixed(2)}'),
+                  Text('   Z: ${magZ.toStringAsFixed(2)}'),
+                  const SizedBox(height: 40),
+                  TextButton(
+                    onPressed: toggleExerciseState,
+                    child: Text(started ? 'Stop' : 'Start'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -169,7 +250,6 @@ class _MyAppState extends State<MyApp> {
         debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
 
         final result = await workout.start(
-          // En una app real, revisa primero los tipos de ejercicio compatibles
           exerciseType: exerciseType,
           features: features,
           enableGps: enableGps,
@@ -177,7 +257,6 @@ class _MyAppState extends State<MyApp> {
 
         if (result.unsupportedFeatures.isNotEmpty) {
           debugPrint('Unsupported features: ${result.unsupportedFeatures}');
-          // Maneja en la UI si lo deseas
         } else {
           debugPrint('All requested features supported');
         }
