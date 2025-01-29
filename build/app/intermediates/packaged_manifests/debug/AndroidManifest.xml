@@ -63,13 +63,10 @@
             android:value="2" />
 
         <service
-            android:name="androidx.health.services.client.VersionApiService"
-            android:exported="true"
-            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" >
-            <intent-filter>
-                <action android:name="hs.versionclient.BIND" />
-            </intent-filter>
-        </service>
+            android:name="com.baseflow.geolocator.GeolocatorLocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
         <uses-library
             android:name="com.google.android.wearable"
@@ -83,6 +80,15 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <service
+            android:name="androidx.health.services.client.VersionApiService"
+            android:exported="true"
+            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" >
+            <intent-filter>
+                <action android:name="hs.versionclient.BIND" />
+            </intent-filter>
+        </service>
 
         <uses-library
             android:name="androidx.window.extensions"

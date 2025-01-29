@@ -1,6 +1,13 @@
 # This is a generated file; do not edit or check into version control.
+battery_plus=/home/ubuntu/.pub-cache/hosted/pub.dev/battery_plus-6.2.1/
 flutter_plugin_android_lifecycle=/home/ubuntu/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.24/
+geolocator=/home/ubuntu/.pub-cache/hosted/pub.dev/geolocator-13.0.2/
+geolocator_android=/home/ubuntu/.pub-cache/hosted/pub.dev/geolocator_android-4.6.1/
+geolocator_apple=/home/ubuntu/.pub-cache/hosted/pub.dev/geolocator_apple-2.3.8+1/
+geolocator_web=/home/ubuntu/.pub-cache/hosted/pub.dev/geolocator_web-4.1.1/
+geolocator_windows=/home/ubuntu/.pub-cache/hosted/pub.dev/geolocator_windows-0.2.3/
 heart_rate_flutter=/home/ubuntu/.pub-cache/hosted/pub.dev/heart_rate_flutter-0.0.3/
+pedometer=/home/ubuntu/.pub-cache/hosted/pub.dev/pedometer-4.0.2/
 permission_handler=/home/ubuntu/.pub-cache/hosted/pub.dev/permission_handler-11.0.1/
 permission_handler_android=/home/ubuntu/.pub-cache/hosted/pub.dev/permission_handler_android-11.1.0/
 permission_handler_apple=/home/ubuntu/.pub-cache/hosted/pub.dev/permission_handler_apple-9.1.4/

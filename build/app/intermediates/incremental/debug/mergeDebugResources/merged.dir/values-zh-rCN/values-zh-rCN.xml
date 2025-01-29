@@ -100,7 +100,7 @@
     <string name="common_google_play_services_wear_update_text">必须使用新版 Google Play 服务。该服务很快就会自行更新。</string>
     <string name="common_open_on_phone">在手机上打开</string>
     <string name="common_signin_button_text">登录</string>
-    <string name="common_signin_button_text_long">使用 Google 帐号登录</string>
+    <string name="common_signin_button_text_long">使用 Google 账号登录</string>
     <string msgid="6412144553299494336" name="confirmation_overlay_a11y_description_fail">"失败"</string>
     <string msgid="8809042819843332546" name="confirmation_overlay_a11y_description_phone">"已在您的手机上打开"</string>
     <string msgid="2936753235333429892" name="confirmation_overlay_a11y_description_success">"成功"</string>

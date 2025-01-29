@@ -1,62 +1,18 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:wear_plus/wear_plus.dart';
-import 'package:workout/workout.dart';
 import 'package:heart_rate_flutter/heart_rate_flutter.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:battery_plus/battery_plus.dart';
 
-/// Fictional Plugin: SpO2 and ECG (already included in your example).
-class OxygenEcgPlugin {
-  /// Simulates a stream of SpO2 values (95%-100%).
-  Stream<double> get spO2Stream => Stream.periodic(
-    const Duration(seconds: 5),
-        (count) => 95 + Random().nextDouble() * 5,
-  );
-
-  /// Simulates a stream of ECG values.
-  Stream<double> get ecgStream => Stream.periodic(
-    const Duration(milliseconds: 500),
-        (count) => Random().nextDouble() * 1.0, // Generic value
-  );
-}
-
-/// Additional Fictional Plugin for Vital Signs (respiration rate, blood pressure, temperature).
-/// Normally, this data would come from an external device or native API.
-class VitalSignsPlugin {
-  /// Respiration rate in breaths per minute (rpm).
-  /// Normal values ~ 12-20 rpm.
-  Stream<double> get respirationRateStream => Stream.periodic(
-    const Duration(seconds: 5),
-        (count) => 12 + Random().nextInt(9).toDouble(), // Between 12 and 20
-  );
-
-  /// Systolic blood pressure (high value, mmHg). Normal value ~ 90-120 mmHg.
-  Stream<double> get systolicBloodPressureStream => Stream.periodic(
-    const Duration(seconds: 10),
-        (count) => 100 + Random().nextInt(30).toDouble(), // 100 - 130
-  );
-
-  /// Diastolic blood pressure (low value, mmHg). Normal value ~ 60-80 mmHg.
-  Stream<double> get diastolicBloodPressureStream => Stream.periodic(
-    const Duration(seconds: 10),
-        (count) => 60 + Random().nextInt(20).toDouble(), // 60 - 80
-  );
-
-  /// Body temperature (°C). Normal value ~ 36.0 - 37.5 °C.
-  Stream<double> get bodyTemperatureStream => Stream.periodic(
-    const Duration(seconds: 7),
-        (count) => 36 + Random().nextDouble() * 2, // ~36-38
-  );
-}
-
-/// Entry point of the app.
+/// Entry point of the application.
 void main() {
   runApp(Platform.isIOS ? const MyIosApp() : const MyApp());
 }
 
-/// Main application for platforms other than iOS.
+/// Main application widget for non-iOS platforms.
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -65,21 +21,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final workout = Workout();
+  // Heart rate plugin instance.
   final HeartRateFlutter _heartRateFlutterPlugin = HeartRateFlutter();
 
-  // Fictional Plugins
-  final OxygenEcgPlugin _oxygenEcgPlugin = OxygenEcgPlugin();
-  final VitalSignsPlugin _vitalSignsPlugin = VitalSignsPlugin();
+  // Battery plugin instance.
+  final Battery _battery = Battery();
 
-  // Heart rate value (from heart_rate_flutter plugin)
-  var heartBeatValue = 0;
-
-  // SpO2 and ECG variables
+  // Vital signs
+  int heartBeatValue = 0;
   double spO2Value = 0.0;
   double ecgValue = 0.0;
-
-  // Additional vital signs variables
   double respirationRateValue = 0.0;
   double systolicValue = 0.0;
   double diastolicValue = 0.0;
@@ -89,113 +40,42 @@ class _MyAppState extends State<MyApp> {
   bool hasFallen = false;
   bool fallDetectionEnabled = true;
 
-  // Danger status
+  // Danger status flag
   bool isInDanger = false;
 
-  // Workout Variables
-  final exerciseType = ExerciseType.walking;
-  final features = [
-    WorkoutFeature.heartRate,
-    WorkoutFeature.calories,
-    WorkoutFeature.steps,
-    WorkoutFeature.distance,
-    WorkoutFeature.speed,
-  ];
-  final enableGps = true;
-
-  double heartRate = 0;
-  double calories = 0;
-  double steps = 0;
-  double distance = 0;
-  double speed = 0;
-  bool started = false;
-
-  // Sensor Variables
+  // Sensor readings
   double accX = 0, accY = 0, accZ = 0;
   double gyrX = 0, gyrY = 0, gyrZ = 0;
   double magX = 0, magY = 0, magZ = 0;
 
-  // Subscriptions
+  // Battery and activity status
+  int batteryLevel = 0;
+  String activityType = 'Unknown';
+
+  // Stream subscriptions
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
   StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;
   StreamSubscription<double>? _spO2Subscription;
   StreamSubscription<double>? _ecgSubscription;
-
-  // New subscriptions for additional vital signs
   StreamSubscription<double>? _respirationSubscription;
   StreamSubscription<double>? _systolicSubscription;
   StreamSubscription<double>? _diastolicSubscription;
   StreamSubscription<double>? _temperatureSubscription;
-
-  _MyAppState() {
-    // Workout Listener
-    workout.stream.listen(
-          (event) {
-        try {
-          debugPrint('${event.feature}: ${event.value} (${event.timestamp})');
-          switch (event.feature) {
-            case WorkoutFeature.unknown:
-            // No action
-              break;
-            case WorkoutFeature.heartRate:
-              setState(() {
-                heartRate = event.value ?? 0;
-              });
-              break;
-            case WorkoutFeature.calories:
-              setState(() {
-                calories = event.value ?? 0;
-              });
-              break;
-            case WorkoutFeature.steps:
-              setState(() {
-                steps = event.value ?? 0;
-              });
-              break;
-            case WorkoutFeature.distance:
-              setState(() {
-                distance = event.value ?? 0;
-              });
-              break;
-            case WorkoutFeature.speed:
-              setState(() {
-                speed = event.value ?? 0;
-              });
-              break;
-          }
-        } catch (e) {
-          debugPrint('Error in workout stream: $e');
-          setState(() {
-            heartRate = 0;
-            calories = 0;
-            steps = 0;
-            distance = 0;
-            speed = 0;
-          });
-        }
-      },
-      onError: (error) {
-        debugPrint('Error in workout.stream.listen: $error');
-        setState(() {
-          heartRate = 0;
-          calories = 0;
-          steps = 0;
-          distance = 0;
-          speed = 0;
-        });
-      },
-    );
-  }
+  StreamSubscription<BatteryState>? _batteryStateSubscription;
 
   @override
   void initState() {
     super.initState();
+    _initializeHeartRate();
+    _initializeBattery();
+    _initializeSensors();
+  }
 
-    // Initialize heart rate plugin
+  /// Initializes the heart rate plugin and listens to its stream.
+  void _initializeHeartRate() {
     _heartRateFlutterPlugin.init();
 
-    // Subscribe to heartBeatStream
     _heartRateFlutterPlugin.heartBeatStream.listen(
           (double? event) {
         if (mounted) {
@@ -213,138 +93,83 @@ class _MyAppState extends State<MyApp> {
         }
       },
     );
+  }
 
-    // Subscribe to SpO2 and ECG (fictional)
+  /// Initializes battery monitoring and listens to battery state changes.
+  Future<void> _initializeBattery() async {
     try {
-      _spO2Subscription = _oxygenEcgPlugin.spO2Stream.listen((value) {
-        setState(() {
-          spO2Value = value;
-        });
-      });
+      // Get the initial battery level.
+      batteryLevel = await _battery.batteryLevel;
+      setState(() {});
     } catch (e) {
-      debugPrint('Error subscribing to SpO2: $e');
+      debugPrint('Error obtaining battery level: $e');
     }
 
-    try {
-      _ecgSubscription = _oxygenEcgPlugin.ecgStream.listen((value) {
-        setState(() {
-          ecgValue = value;
-        });
-      });
-    } catch (e) {
-      debugPrint('Error subscribing to ECG: $e');
-    }
-
-    // Subscribe to base sensors (accelerometer, gyroscope, magnetometer)
-    try {
-      _accelerometerSubscription = accelerometerEvents.listen((event) {
-        setState(() {
-          accX = event.x;
-          accY = event.y;
-          accZ = event.z;
-        });
-        if (fallDetectionEnabled) {
-          detectFall(event);
+    // Listen to battery state changes (charging, discharging, etc.).
+    _batteryStateSubscription = _battery.onBatteryStateChanged.listen(
+          (BatteryState state) async {
+        try {
+          final level = await _battery.batteryLevel;
+          if (mounted) {
+            setState(() {
+              batteryLevel = level;
+            });
+          }
+        } catch (e) {
+          debugPrint('Error updating battery level: $e');
         }
+      },
+    );
+  }
+
+  /// Initializes sensor streams and sets up listeners for each sensor.
+  void _initializeSensors() {
+    // Accelerometer
+    _accelerometerSubscription = accelerometerEvents.listen((event) {
+      setState(() {
+        accX = event.x;
+        accY = event.y;
+        accZ = event.z;
       });
-    } catch (e) {
-      debugPrint('Error subscribing to accelerometer: $e');
-    }
+      _handleAccelerometer(event);
+    });
 
-    try {
-      _gyroscopeSubscription = gyroscopeEvents.listen((event) {
-        setState(() {
-          gyrX = event.x;
-          gyrY = event.y;
-          gyrZ = event.z;
-        });
+    // Gyroscope
+    _gyroscopeSubscription = gyroscopeEvents.listen((event) {
+      setState(() {
+        gyrX = event.x;
+        gyrY = event.y;
+        gyrZ = event.z;
       });
-    } catch (e) {
-      debugPrint('Error subscribing to gyroscope: $e');
-    }
+    });
 
-    try {
-      _magnetometerSubscription = magnetometerEvents.listen((event) {
-        setState(() {
-          magX = event.x;
-          magY = event.y;
-          magZ = event.z;
-        });
+    // Magnetometer
+    _magnetometerSubscription = magnetometerEvents.listen((event) {
+      setState(() {
+        magX = event.x;
+        magY = event.y;
+        magZ = event.z;
       });
-    } catch (e) {
-      debugPrint('Error subscribing to magnetometer: $e');
-    }
+    });
 
-    // ================================
-    // Subscribe to additional vital signs
-    // ================================
-    try {
-      _respirationSubscription =
-          _vitalSignsPlugin.respirationRateStream.listen((value) {
-            setState(() {
-              respirationRateValue = value;
-            });
-          });
-    } catch (e) {
-      debugPrint('Error in respiration rate: $e');
-    }
+    // Additional sensor streams can be initialized here if needed.
+  }
 
-    try {
-      _systolicSubscription =
-          _vitalSignsPlugin.systolicBloodPressureStream.listen((value) {
-            setState(() {
-              systolicValue = value;
-            });
-          });
-    } catch (e) {
-      debugPrint('Error in systolic blood pressure: $e');
-    }
-
-    try {
-      _diastolicSubscription =
-          _vitalSignsPlugin.diastolicBloodPressureStream.listen((value) {
-            setState(() {
-              diastolicValue = value;
-            });
-          });
-    } catch (e) {
-      debugPrint('Error in diastolic blood pressure: $e');
-    }
-
-    try {
-      _temperatureSubscription =
-          _vitalSignsPlugin.bodyTemperatureStream.listen((value) {
-            setState(() {
-              temperatureValue = value;
-            });
-          });
-    } catch (e) {
-      debugPrint('Error in body temperature: $e');
+  /// Handles accelerometer events for fall detection and activity monitoring.
+  void _handleAccelerometer(AccelerometerEvent event) {
+    if (fallDetectionEnabled) {
+      _detectFall(event);
+      _detectActivity(event);
     }
   }
 
-  @override
-  void dispose() {
-    // Cancel all subscriptions
-    _accelerometerSubscription?.cancel();
-    _gyroscopeSubscription?.cancel();
-    _magnetometerSubscription?.cancel();
-    _spO2Subscription?.cancel();
-    _ecgSubscription?.cancel();
-    _respirationSubscription?.cancel();
-    _systolicSubscription?.cancel();
-    _diastolicSubscription?.cancel();
-    _temperatureSubscription?.cancel();
-    super.dispose();
-  }
-
-  /// Simple fall detection: calculates the magnitude of acceleration and compares it against a threshold.
-  void detectFall(AccelerometerEvent event) {
+  /// Simple fall detection based on the magnitude of acceleration.
+  void _detectFall(AccelerometerEvent event) {
     final double magnitude =
     sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
     const double fallThreshold = 25.0;
 
-    if (magnitude > fallThreshold) {
+    if (magnitude > fallThreshold && !hasFallen) {
       debugPrint('Possible fall detected. Magnitude: $magnitude');
       setState(() {
         hasFallen = true;
@@ -352,24 +177,40 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Checks vital signs and danger status.
-  /// You can add more advanced or complex logic here.
-  void checkDangerStatus() {
+  /// Basic activity detection based on the magnitude of acceleration.
+  void _detectActivity(AccelerometerEvent event) {
+    final double magnitude =
+    sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+
+    String newActivity;
+    if (magnitude < 11) {
+      newActivity = 'Idle';
+    } else if (magnitude < 18) {
+      newActivity = 'Walking';
+    } else {
+      newActivity = 'Running';
+    }
+
+    if (activityType != newActivity) {
+      setState(() {
+        activityType = newActivity;
+      });
+    }
+  }
+
+  /// Checks vital signs and updates the danger status.
+  void _checkDangerStatus() {
     bool danger = false;
 
-    // Example of very simple thresholds (not clinical).
-    // Adjust these values to reality or the regulations you consider.
+    // Example thresholds (non-clinical).
     if (heartBeatValue < 40 || heartBeatValue > 150) {
       danger = true;
-      debugPrint('Abnormal heart rate: $heartBeatValue');
+      debugPrint('Abnormal heart rate: $heartBeatValue bpm');
     }
     if (spO2Value < 90) {
       danger = true;
-      debugPrint('Low SpO2 level: $spO2Value');
+      debugPrint('Low SpO2: $spO2Value%');
     }
-    // ECG: here only a fictitious number is shown; in practice, ECG wave analysis is required.
-    // if (ecgValue ...)
-
     if (respirationRateValue < 8 || respirationRateValue > 30) {
       danger = true;
       debugPrint('Abnormal respiration rate: $respirationRateValue');
@@ -385,107 +226,66 @@ class _MyAppState extends State<MyApp> {
           'Abnormal temperature: ${temperatureValue.toStringAsFixed(1)} °C');
     }
     if (hasFallen) {
-      // If a fall is detected, we can include it as a danger factor.
       danger = true;
-      debugPrint('The person has fallen.');
+      debugPrint('User has fallen.');
     }
 
-    setState(() {
-      isInDanger = danger;
-    });
+    if (isInDanger != danger) {
+      setState(() {
+        isInDanger = danger;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    // Cancel all stream subscriptions to prevent memory leaks.
+    _accelerometerSubscription?.cancel();
+    _gyroscopeSubscription?.cancel();
+    _magnetometerSubscription?.cancel();
+    _spO2Subscription?.cancel();
+    _ecgSubscription?.cancel();
+    _respirationSubscription?.cancel();
+    _systolicSubscription?.cancel();
+    _diastolicSubscription?.cancel();
+    _temperatureSubscription?.cancel();
+    _batteryStateSubscription?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Invoke checkDangerStatus periodically or each time build() is called.
-    // You could also use a periodic Timer or do it in onData of each stream.
-    checkDangerStatus();
+    // Check danger status during each build.
+    _checkDangerStatus();
 
     return MaterialApp(
-      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+      ),
       home: AmbientMode(
         builder: (context, mode, child) => child!,
         child: Scaffold(
           body: Center(
             child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  Text(
-                    'Danger Status?: $isInDanger',
-                    style: TextStyle(
-                      color: isInDanger ? Colors.red : Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
+                  _buildDangerStatus(),
                   const SizedBox(height: 20),
-
-                  // Heart rate
-                  Text(
-                      'Heart Rate (heart_rate_flutter plugin): $heartBeatValue'),
-                  // Heart rate (Workout API)
-                  Text('Heart Rate (Workout API): $heartRate'),
-                  Text('Calories: ${calories.toStringAsFixed(2)}'),
-                  Text('Steps: $steps'),
-                  Text('Distance: ${distance.toStringAsFixed(2)}'),
-                  Text('Speed: ${speed.toStringAsFixed(2)}'),
-
+                  _buildVitalSigns(),
                   const Divider(),
-                  // SpO2 and ECG
-                  Text(
-                      'Blood Oxygen (SpO₂): ${spO2Value.toStringAsFixed(1)} %'),
-                  Text('ECG (simulated value): ${ecgValue.toStringAsFixed(3)}'),
-
+                  _buildFallDetection(),
                   const Divider(),
-                  // Additional Vital Signs
-                  Text(
-                      'Respiration Rate: ${respirationRateValue.toStringAsFixed(0)} rpm'),
-                  Text(
-                      'Blood Pressure: ${systolicValue.toStringAsFixed(0)}/${diastolicValue.toStringAsFixed(0)} mmHg'),
-                  Text(
-                      'Body Temperature: ${temperatureValue.toStringAsFixed(1)} °C'),
-
+                  _buildAccelerometerData(),
                   const Divider(),
-                  // Fall Detection
-                  Text('Fall Detected?: $hasFallen'),
-
+                  _buildGyroscopeData(),
                   const Divider(),
-                  // Accelerometer
-                  Text('Accelerometer (m/s²):'),
-                  Text('   X: ${accX.toStringAsFixed(2)}'),
-                  Text('   Y: ${accY.toStringAsFixed(2)}'),
-                  Text('   Z: ${accZ.toStringAsFixed(2)}'),
-
+                  _buildMagnetometerData(),
                   const Divider(),
-                  // Gyroscope
-                  Text('Gyroscope (rad/s):'),
-                  Text('   X: ${gyrX.toStringAsFixed(2)}'),
-                  Text('   Y: ${gyrY.toStringAsFixed(2)}'),
-                  Text('   Z: ${gyrZ.toStringAsFixed(2)}'),
-
-                  const Divider(),
-                  // Magnetometer
-                  Text('Magnetometer (µT):'),
-                  Text('   X: ${magX.toStringAsFixed(2)}'),
-                  Text('   Y: ${magY.toStringAsFixed(2)}'),
-                  Text('   Z: ${magZ.toStringAsFixed(2)}'),
-
+                  _buildBatteryAndActivity(),
                   const SizedBox(height: 40),
-                  TextButton(
-                    onPressed: toggleExerciseState,
-                    child: Text(started ? 'Stop' : 'Start'),
-                  ),
-
-                  // Button to reset fall detection
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        hasFallen = false;
-                      });
-                    },
-                    child: const Text('Reset Fall Detection'),
-                  ),
+                  _buildResetButton(),
                 ],
               ),
             ),
@@ -495,132 +295,132 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  /// Starts or stops the exercise (Workout).
-  void toggleExerciseState() async {
-    if (started) {
-      await workout.stop();
-    } else {
-      try {
-        final supportedExerciseTypes =
-        await workout.getSupportedExerciseTypes();
-        debugPrint('Supported exercise types: ${supportedExerciseTypes.length}');
-
-        final result = await workout.start(
-          exerciseType: exerciseType,
-          features: features,
-          enableGps: enableGps,
-        );
-
-        if (result.unsupportedFeatures.isNotEmpty) {
-          debugPrint('Unsupported features: ${result.unsupportedFeatures}');
-        } else {
-          debugPrint('All requested features are supported');
-        }
-      } catch (e) {
-        debugPrint('Error starting Workout: $e');
-        setState(() {
-          heartRate = 0;
-          calories = 0;
-          steps = 0;
-          distance = 0;
-          speed = 0;
-          started = false;
-        });
-        return;
-      }
-    }
-    setState(() => started = !started);
-  }
-}
-
-/// Main App for iOS (maintains your previous logic).
-class MyIosApp extends StatefulWidget {
-  const MyIosApp({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _MyIosAppState();
-}
-
-class _MyIosAppState extends State<MyIosApp> {
-  final workout = Workout();
-  var exerciseType = ExerciseType.workout;
-  var locationType = WorkoutLocationType.indoor;
-  var swimmingLocationType = WorkoutSwimmingLocationType.pool;
-  var lapLength = 25.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Exercise type dropdown
-              DropdownButton<ExerciseType>(
-                value: exerciseType,
-                onChanged: (value) => setState(() => exerciseType = value!),
-                items: ExerciseType.values
-                    .map((e) =>
-                    DropdownMenuItem(value: e, child: Text(e.name)))
-                    .toList(),
-              ),
-              // Location type dropdown
-              DropdownButton<WorkoutLocationType>(
-                value: locationType,
-                onChanged: (value) => setState(() => locationType = value!),
-                items: WorkoutLocationType.values
-                    .map((e) => DropdownMenuItem(
-                    value: e, child: Text(e.name)))
-                    .toList(),
-              ),
-              // Swimming location type dropdown (pool or open water)
-              DropdownButton<WorkoutSwimmingLocationType>(
-                value: swimmingLocationType,
-                onChanged: (value) =>
-                    setState(() => swimmingLocationType = value!),
-                items: WorkoutSwimmingLocationType.values
-                    .map((e) => DropdownMenuItem(
-                    value: e, child: Text(e.name)))
-                    .toList(),
-              ),
-              // Pool length field
-              TextField(
-                decoration:
-                const InputDecoration(labelText: 'Pool Length (meters)'),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  try {
-                    setState(() => lapLength = double.parse(value));
-                  } catch (e) {
-                    debugPrint('Error parsing lapLength: $e');
-                    setState(() => lapLength = 25.0);
-                  }
-                },
-              ),
-              ElevatedButton(
-                onPressed: start,
-                child: const Text('Start App on Apple Watch'),
-              ),
-            ],
-          ),
-        ),
+  /// Builds the danger status display widget.
+  Widget _buildDangerStatus() {
+    return Text(
+      'Danger Status: ${isInDanger ? "Yes" : "No"}',
+      style: TextStyle(
+        color: isInDanger ? Colors.red : Colors.green,
+        fontWeight: FontWeight.bold,
+        fontSize: 18,
       ),
     );
   }
 
-  /// Starts the Workout on iOS.
-  void start() {
-    try {
-      workout.start(
-        exerciseType: exerciseType,
-        features: [],
-        locationType: locationType,
-        swimmingLocationType: swimmingLocationType,
-        lapLength: lapLength,
-      );
-    } catch (e) {
-      debugPrint('Error starting Workout on iOS: $e');
-    }
+  /// Builds the vital signs display widget.
+  Widget _buildVitalSigns() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Heart Rate: $heartBeatValue bpm',
+          style: const TextStyle(fontSize: 16),
+        ),
+        // Additional vital signs can be displayed here.
+      ],
+    );
+  }
+
+  /// Builds the fall detection display widget.
+  Widget _buildFallDetection() {
+    return Text(
+      'Fall Detected: ${hasFallen ? "Yes" : "No"}',
+      style: const TextStyle(fontSize: 16),
+    );
+  }
+
+  /// Builds the accelerometer data display widget.
+  Widget _buildAccelerometerData() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Accelerometer (m/s²):',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text('   X: ${accX.toStringAsFixed(2)}'),
+        Text('   Y: ${accY.toStringAsFixed(2)}'),
+        Text('   Z: ${accZ.toStringAsFixed(2)}'),
+      ],
+    );
+  }
+
+  /// Builds the gyroscope data display widget.
+  Widget _buildGyroscopeData() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Gyroscope (rad/s):',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text('   X: ${gyrX.toStringAsFixed(2)}'),
+        Text('   Y: ${gyrY.toStringAsFixed(2)}'),
+        Text('   Z: ${gyrZ.toStringAsFixed(2)}'),
+      ],
+    );
+  }
+
+  /// Builds the magnetometer data display widget.
+  Widget _buildMagnetometerData() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Magnetometer (µT):',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text('   X: ${magX.toStringAsFixed(2)}'),
+        Text('   Y: ${magY.toStringAsFixed(2)}'),
+        Text('   Z: ${magZ.toStringAsFixed(2)}'),
+      ],
+    );
+  }
+
+  /// Builds the battery level and activity type display widget.
+  Widget _buildBatteryAndActivity() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Battery Level: $batteryLevel%'),
+        Text('Activity: $activityType'),
+      ],
+    );
+  }
+
+  /// Builds the reset button for fall detection.
+  Widget _buildResetButton() {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          hasFallen = false;
+        });
+      },
+      child: const Text('Reset Fall Detection'),
+    );
+  }
+}
+
+/// Main application widget for iOS platforms without workout functionality.
+class MyIosApp extends StatelessWidget {
+  const MyIosApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // iOS-specific UI without workout functionality.
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('iOS App')),
+        body: const SafeArea(
+          child: Center(
+            child: Text(
+              'iOS version of the app without workout functionality.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

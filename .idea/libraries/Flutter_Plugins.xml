@@ -4,8 +4,14 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/permission_handler-11.0.1" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/workout-0.6.7" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/heart_rate_flutter-0.0.3" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/wear_plus-1.2.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/sensors_plus-6.1.1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator-13.0.2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator_android-4.6.1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator_web-4.1.1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/geolocator_apple-2.3.8+1" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/pedometer-4.0.2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/wear_plus-1.2.2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/battery_plus-6.2.1" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
