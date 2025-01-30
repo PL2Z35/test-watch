@@ -51,6 +51,7 @@ MERGED from [:geolocator_android] /home/ubuntu/Documents/GitHub/test-watch/build
 MERGED from [:heart_rate_flutter] /home/ubuntu/Documents/GitHub/test-watch/build/heart_rate_flutter/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
 MERGED from [:pedometer] /home/ubuntu/Documents/GitHub/test-watch/build/pedometer/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
 MERGED from [:permission_handler_android] /home/ubuntu/Documents/GitHub/test-watch/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:proximity_sensor] /home/ubuntu/Documents/GitHub/test-watch/build/proximity_sensor/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
 MERGED from [:sensors_plus] /home/ubuntu/Documents/GitHub/test-watch/build/sensors_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
 MERGED from [:wear_plus] /home/ubuntu/Documents/GitHub/test-watch/build/wear_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-13:12
 MERGED from [com.google.android.gms:play-services-location:21.2.0] /home/ubuntu/.gradle/caches/transforms-3/062a0e0b197545c8dac64c951de02bc9/transformed/jetified-play-services-location-21.2.0/AndroidManifest.xml:2:1-9:12
@@ -152,6 +153,8 @@ MERGED from [:pedometer] /home/ubuntu/Documents/GitHub/test-watch/build/pedomete
 MERGED from [:pedometer] /home/ubuntu/Documents/GitHub/test-watch/build/pedometer/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:permission_handler_android] /home/ubuntu/Documents/GitHub/test-watch/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:permission_handler_android] /home/ubuntu/Documents/GitHub/test-watch/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:proximity_sensor] /home/ubuntu/Documents/GitHub/test-watch/build/proximity_sensor/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:proximity_sensor] /home/ubuntu/Documents/GitHub/test-watch/build/proximity_sensor/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:sensors_plus] /home/ubuntu/Documents/GitHub/test-watch/build/sensors_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:sensors_plus] /home/ubuntu/Documents/GitHub/test-watch/build/sensors_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
 MERGED from [:wear_plus] /home/ubuntu/Documents/GitHub/test-watch/build/wear_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
@@ -282,6 +285,10 @@ ADDED from [:geolocator_android] /home/ubuntu/Documents/GitHub/test-watch/build/
 		ADDED from [:geolocator_android] /home/ubuntu/Documents/GitHub/test-watch/build/geolocator_android/intermediates/merged_manifest/debug/AndroidManifest.xml:12:13-53
 	android:name
 		ADDED from [:geolocator_android] /home/ubuntu/Documents/GitHub/test-watch/build/geolocator_android/intermediates/merged_manifest/debug/AndroidManifest.xml:9:13-77
+uses-permission#android.hardware.sensor.proximity
+ADDED from [:proximity_sensor] /home/ubuntu/Documents/GitHub/test-watch/build/proximity_sensor/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-73
+	android:name
+		ADDED from [:proximity_sensor] /home/ubuntu/Documents/GitHub/test-watch/build/proximity_sensor/intermediates/merged_manifest/debug/AndroidManifest.xml:7:22-70
 uses-permission#android.permission.WAKE_LOCK
 ADDED from [:wear_plus] /home/ubuntu/Documents/GitHub/test-watch/build/wear_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:11:5-68
 	android:name

@@ -22,7 +22,9 @@
 
     <queries>
         <package android:name="com.google.android.wearable.healthservices" />
-    </queries> <!-- Required for ambient mode support -->
+    </queries>
+
+    <uses-permission android:name="android.hardware.sensor.proximity" /> <!-- Required for ambient mode support -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <permission
