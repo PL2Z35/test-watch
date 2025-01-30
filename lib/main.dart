@@ -28,19 +28,13 @@ class _MyAppState extends State<MyApp> {
   final Battery _battery = Battery();
 
   // Vital signs
-  int heartBeatValue = 0;
-  double spO2Value = 0.0;
-  double ecgValue = 0.0;
-  double respirationRateValue = 0.0;
-  double systolicValue = 0.0;
-  double diastolicValue = 0.0;
-  double temperatureValue = 0.0;
+  int heartRate = 0;
 
   // Fall detection
   bool hasFallen = false;
   bool fallDetectionEnabled = true;
 
-  // Danger status flag
+  // Danger status indicator
   bool isInDanger = false;
 
   // Sensor readings
@@ -48,7 +42,7 @@ class _MyAppState extends State<MyApp> {
   double gyrX = 0, gyrY = 0, gyrZ = 0;
   double magX = 0, magY = 0, magZ = 0;
 
-  // Battery and activity status
+  // Battery level and activity
   int batteryLevel = 0;
   String activityType = 'Unknown';
 
@@ -56,12 +50,6 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
   StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;
-  StreamSubscription<double>? _spO2Subscription;
-  StreamSubscription<double>? _ecgSubscription;
-  StreamSubscription<double>? _respirationSubscription;
-  StreamSubscription<double>? _systolicSubscription;
-  StreamSubscription<double>? _diastolicSubscription;
-  StreamSubscription<double>? _temperatureSubscription;
   StreamSubscription<BatteryState>? _batteryStateSubscription;
 
   @override
@@ -80,7 +68,7 @@ class _MyAppState extends State<MyApp> {
           (double? event) {
         if (mounted) {
           setState(() {
-            heartBeatValue = (event ?? 0).toInt();
+            heartRate = (event ?? 0).toInt();
           });
         }
       },
@@ -88,21 +76,21 @@ class _MyAppState extends State<MyApp> {
         debugPrint('Error in heartBeatStream: $error');
         if (mounted) {
           setState(() {
-            heartBeatValue = 0;
+            heartRate = 0;
           });
         }
       },
     );
   }
 
-  /// Initializes battery monitoring and listens to battery state changes.
+  /// Initializes battery monitoring and listens to state changes.
   Future<void> _initializeBattery() async {
     try {
-      // Get the initial battery level.
+      // Get initial battery level.
       batteryLevel = await _battery.batteryLevel;
       setState(() {});
     } catch (e) {
-      debugPrint('Error obtaining battery level: $e');
+      debugPrint('Error fetching battery level: $e');
     }
 
     // Listen to battery state changes (charging, discharging, etc.).
@@ -163,7 +151,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Simple fall detection based on the magnitude of acceleration.
+  /// Simple fall detection based on acceleration magnitude.
   void _detectFall(AccelerometerEvent event) {
     final double magnitude =
     sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
@@ -177,14 +165,14 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Basic activity detection based on the magnitude of acceleration.
+  /// Basic activity detection based on acceleration magnitude.
   void _detectActivity(AccelerometerEvent event) {
     final double magnitude =
     sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
 
     String newActivity;
     if (magnitude < 11) {
-      newActivity = 'Idle';
+      newActivity = 'Inactive';
     } else if (magnitude < 18) {
       newActivity = 'Walking';
     } else {
@@ -198,33 +186,16 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  /// Checks vital signs and updates the danger status.
+  /// Checks vital signs and updates danger status.
   void _checkDangerStatus() {
     bool danger = false;
 
     // Example thresholds (non-clinical).
-    if (heartBeatValue < 40 || heartBeatValue > 150) {
+    if (heartRate < 40 || heartRate > 150) {
       danger = true;
-      debugPrint('Abnormal heart rate: $heartBeatValue bpm');
+      debugPrint('Abnormal heart rate: $heartRate bpm');
     }
-    if (spO2Value < 90) {
-      danger = true;
-      debugPrint('Low SpO2: $spO2Value%');
-    }
-    if (respirationRateValue < 8 || respirationRateValue > 30) {
-      danger = true;
-      debugPrint('Abnormal respiration rate: $respirationRateValue');
-    }
-    if (systolicValue > 180 || diastolicValue > 120) {
-      danger = true;
-      debugPrint(
-          'Dangerous hypertension: ${systolicValue.toStringAsFixed(0)}/${diastolicValue.toStringAsFixed(0)} mmHg');
-    }
-    if (temperatureValue > 39 || temperatureValue < 35) {
-      danger = true;
-      debugPrint(
-          'Abnormal temperature: ${temperatureValue.toStringAsFixed(1)} °C');
-    }
+
     if (hasFallen) {
       danger = true;
       debugPrint('User has fallen.');
@@ -239,182 +210,295 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    // Cancel all stream subscriptions to prevent memory leaks.
+    // Cancel all stream subscriptions to avoid memory leaks.
     _accelerometerSubscription?.cancel();
     _gyroscopeSubscription?.cancel();
     _magnetometerSubscription?.cancel();
-    _spO2Subscription?.cancel();
-    _ecgSubscription?.cancel();
-    _respirationSubscription?.cancel();
-    _systolicSubscription?.cancel();
-    _diastolicSubscription?.cancel();
-    _temperatureSubscription?.cancel();
     _batteryStateSubscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Check danger status during each build.
+    // Check danger status on each build.
     _checkDangerStatus();
 
     return MaterialApp(
-      theme: ThemeData.dark().copyWith(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
         scaffoldBackgroundColor: Colors.black,
       ),
       home: AmbientMode(
         builder: (context, mode, child) => child!,
         child: Scaffold(
-          body: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  _buildDangerStatus(),
-                  const SizedBox(height: 20),
-                  _buildVitalSigns(),
-                  const Divider(),
-                  _buildFallDetection(),
-                  const Divider(),
-                  _buildAccelerometerData(),
-                  const Divider(),
-                  _buildGyroscopeData(),
-                  const Divider(),
-                  _buildMagnetometerData(),
-                  const Divider(),
-                  _buildBatteryAndActivity(),
-                  const SizedBox(height: 40),
-                  _buildResetButton(),
-                ],
+          body: Stack(
+            children: [
+              // Central Circular Design
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isInDanger ? Colors.redAccent : Colors.blueGrey[900],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black54,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Danger Status
+                        _buildStatusIcon(
+                          icon: isInDanger
+                              ? Icons.warning_amber_rounded
+                              : Icons.check_circle_rounded,
+                          color: isInDanger ? Colors.red : Colors.green,
+                          label: isInDanger ? 'Danger' : 'Safe',
+                        ),
+                        const SizedBox(height: 20),
+                        // Heart Rate
+                        _buildIconValueRow(
+                          icon: Icons.favorite,
+                          value: '$heartRate bpm',
+                          label: 'Heart Rate',
+                        ),
+                        const SizedBox(height: 10),
+                        // Fall Detection
+                        _buildIconValueRow(
+                          icon: hasFallen ? Icons.person_remove : Icons.person_add,
+                          value: hasFallen ? 'Yes' : 'No',
+                          label: 'Fall Detected',
+                          iconColor: hasFallen ? Colors.red : Colors.green,
+                        ),
+                        const SizedBox(height: 10),
+                        // Battery Level and Activity
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Battery
+                            _buildIconValueColumn(
+                              icon: Icons.battery_std,
+                              value: '$batteryLevel%',
+                              label: 'Battery',
+                            ),
+                            // Activity
+                            _buildIconValueColumn(
+                              icon: _getActivityIcon(),
+                              value: activityType,
+                              label: 'Activity',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              // Sensor Data Overlay (Optional: Can be removed or minimized)
+              // Positioned(
+              //   bottom: 10,
+              //   left: 10,
+              //   right: 10,
+              //   child: _buildSensorDataOverlay(),
+              // ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  /// Builds the danger status display widget.
-  Widget _buildDangerStatus() {
-    return Text(
-      'Danger Status: ${isInDanger ? "Yes" : "No"}',
-      style: TextStyle(
-        color: isInDanger ? Colors.red : Colors.green,
-        fontWeight: FontWeight.bold,
-        fontSize: 18,
+  /// Returns the appropriate activity icon based on the current activity.
+  IconData _getActivityIcon() {
+    switch (activityType) {
+      case 'Inactive':
+        return Icons.hourglass_empty;
+      case 'Walking':
+        return Icons.directions_walk;
+      case 'Running':
+        return Icons.directions_run;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  /// Builds a row with an icon and its corresponding value.
+  Widget _buildIconValueRow({
+    required IconData icon,
+    required String value,
+    required String label,
+    Color iconColor = Colors.white,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          color: iconColor,
+          size: 24,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds a column with an icon and its corresponding value.
+  Widget _buildIconValueColumn({
+    required IconData icon,
+    required String value,
+    required String label,
+    Color iconColor = Colors.white,
+  }) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          color: iconColor,
+          size: 24,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds a status icon with a label.
+  Widget _buildStatusIcon({
+    required IconData icon,
+    required Color color,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          color: color,
+          size: 28,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// (Optional) Builds an overlay to display detailed sensor data.
+  Widget _buildSensorDataOverlay() {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      color: Colors.black54,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Accelerometer
+          _buildSensorIconValue(
+            icon: Icons.arrow_upward,
+            label: 'Accel',
+            value: 'X:${accX.toStringAsFixed(1)} Y:${accY.toStringAsFixed(1)} Z:${accZ.toStringAsFixed(1)}',
+          ),
+          // Gyroscope
+          _buildSensorIconValue(
+            icon: Icons.g_mobiledata,
+            label: 'Gyro',
+            value: 'X:${gyrX.toStringAsFixed(1)} Y:${gyrY.toStringAsFixed(1)} Z:${gyrZ.toStringAsFixed(1)}',
+          ),
+          // Magnetometer
+          _buildSensorIconValue(
+            icon: Icons.filter_hdr,
+            label: 'Mag',
+            value: 'X:${magX.toStringAsFixed(1)} Y:${magY.toStringAsFixed(1)} Z:${magZ.toStringAsFixed(1)}',
+          ),
+        ],
       ),
     );
   }
 
-  /// Builds the vital signs display widget.
-  Widget _buildVitalSigns() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  /// Builds a sensor icon with its corresponding value.
+  Widget _buildSensorIconValue({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
       children: [
+        Icon(
+          icon,
+          color: Colors.blueAccent,
+          size: 16,
+        ),
+        const SizedBox(width: 4),
         Text(
-          'Heart Rate: $heartBeatValue bpm',
-          style: const TextStyle(fontSize: 16),
+          '$label: $value',
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 10,
+          ),
         ),
-        // Additional vital signs can be displayed here.
       ],
-    );
-  }
-
-  /// Builds the fall detection display widget.
-  Widget _buildFallDetection() {
-    return Text(
-      'Fall Detected: ${hasFallen ? "Yes" : "No"}',
-      style: const TextStyle(fontSize: 16),
-    );
-  }
-
-  /// Builds the accelerometer data display widget.
-  Widget _buildAccelerometerData() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Accelerometer (m/s²):',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text('   X: ${accX.toStringAsFixed(2)}'),
-        Text('   Y: ${accY.toStringAsFixed(2)}'),
-        Text('   Z: ${accZ.toStringAsFixed(2)}'),
-      ],
-    );
-  }
-
-  /// Builds the gyroscope data display widget.
-  Widget _buildGyroscopeData() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Gyroscope (rad/s):',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text('   X: ${gyrX.toStringAsFixed(2)}'),
-        Text('   Y: ${gyrY.toStringAsFixed(2)}'),
-        Text('   Z: ${gyrZ.toStringAsFixed(2)}'),
-      ],
-    );
-  }
-
-  /// Builds the magnetometer data display widget.
-  Widget _buildMagnetometerData() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Magnetometer (µT):',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text('   X: ${magX.toStringAsFixed(2)}'),
-        Text('   Y: ${magY.toStringAsFixed(2)}'),
-        Text('   Z: ${magZ.toStringAsFixed(2)}'),
-      ],
-    );
-  }
-
-  /// Builds the battery level and activity type display widget.
-  Widget _buildBatteryAndActivity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Battery Level: $batteryLevel%'),
-        Text('Activity: $activityType'),
-      ],
-    );
-  }
-
-  /// Builds the reset button for fall detection.
-  Widget _buildResetButton() {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          hasFallen = false;
-        });
-      },
-      child: const Text('Reset Fall Detection'),
     );
   }
 }
 
-/// Main application widget for iOS platforms without workout functionality.
+/// Main application widget for iOS platforms without exercise functionality.
 class MyIosApp extends StatelessWidget {
   const MyIosApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // iOS-specific UI without workout functionality.
+    // UI specific to iOS without exercise functionality.
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
       home: Scaffold(
         appBar: AppBar(title: const Text('iOS App')),
         body: const SafeArea(
           child: Center(
             child: Text(
-              'iOS version of the app without workout functionality.',
+              'iOS app version without exercise functionality.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18),
             ),
